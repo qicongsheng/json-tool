@@ -1,0 +1,12 @@
+/target
+/.idea
+.superpowers/
+node_modules/
+dist/
+src-tauri/target/
+/src-tauri/gen/schemas/
+/*.png
+/qa/
+/.vite/
+/.claude/
+test.txt

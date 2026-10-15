@@ -1,0 +1,373 @@
+/* ═══ 主题变量（自 docs/prototypes/json-tool-ui.html 移植） ═══ */
+:root, .app {
+  --bg: #14171c;
+  --panel: #1b1f26;
+  --panel2: #20252e;
+  --border: #2a3038;
+  --fg: #cdd6e0;
+  /* 深色次要文字提亮一档（原 #7d8794 在深底上对比不足）；与 naive-theme.ts fgDim 同步 */
+  --fg-dim: #96a0ae;
+  --key: #7fb3e8;
+  --str: #8fbf7f;
+  --num: #d19a66;
+  --bool: #c678dd;
+  --accent: #e8a33d;
+  --accent-dim: rgba(232, 163, 61, .14);
+  --hit: rgba(232, 163, 61, .20);
+  /* 深色 primary 提亮：#2f6fab 作 hover 描边/选中底偏暗，与 naive primary 同步 */
+  --primary: #4c8fd8;
+}
+.app[data-theme="light"] {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --panel2: #eef0f3;
+  --border: #d8dde3;
+  --fg: #242b33;
+  --fg-dim: #6b7683;
+  --key: #1a6bb8;
+  --str: #2e7d32;
+  --num: #b25f15;
+  --bool: #8e44ad;
+  --accent: #c07c10;
+  --accent-dim: rgba(192, 124, 16, .12);
+  --hit: rgba(192, 124, 16, .18);
+  --primary: #1a6bb8;
+}
+
+* { box-sizing: border-box; }
+html, body, #app { height: 100%; margin: 0; }
+body {
+  font: 13px/1.5 "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei", sans-serif;
+  overflow: hidden;
+}
+.app {
+  height: 100%; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--bg); color: var(--fg);
+}
+.mono { font-family: "Cascadia Code", "JetBrains Mono", Consolas, monospace; }
+
+/* ── 工具栏 ─────────────────────────────── */
+.toolbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; background: var(--panel);
+  border-bottom: 1px solid var(--border); flex: none;
+}
+.logo { font-weight: 700; letter-spacing: .5px; font-size: 14px; user-select: none; }
+.logo .brace { color: var(--accent); font-family: "Cascadia Code", Consolas, monospace; }
+.toolbar .spacer { flex: 1; }
+.btn {
+  border: 1px solid var(--border); background: var(--panel2); color: var(--fg);
+  /* 22px 高（与原文搜索框等高）：16px 行高 + 上下 2px padding + 2px 边框 */
+  padding: 2px 10px; border-radius: 6px; cursor: pointer;
+  font: inherit; font-size: 12px; line-height: 16px;
+  transition: border-color .15s, background .15s;
+}
+.btn:hover { border-color: var(--primary); }
+.btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+/* ── 主区分栏 ───────────────────────────── */
+.main { flex: 1; display: flex; min-height: 0; }
+.pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+/* 默认固定 28%；手动拖拽写百分比内联 flex（15%–80%），双击复位（清内联 flex）回到 28% */
+#treePane { flex: 0 0 28%; min-width: 180px; }
+#rawPane  { flex: 1; }
+/* 分隔线 2px，伪元素把拖拽热区扩到 8px（线本身视觉不变粗，hover/dragging 变色不变）*/
+.splitter-v {
+  position: relative; flex: none; width: 2px; cursor: col-resize; background: var(--border);
+  transition: background .15s;
+}
+.splitter-v::before { content: ""; position: absolute; inset: 0 -3px; }
+.splitter-v:hover, .splitter-v.dragging { background: var(--primary); }
+.splitter-h {
+  position: relative; flex: none; height: 2px; cursor: row-resize; background: var(--border);
+  transition: background .15s;
+}
+.splitter-h::before { content: ""; position: absolute; inset: -3px 0; }
+.splitter-h:hover, .splitter-h.dragging { background: var(--primary); }
+body.col-resizing { cursor: col-resize; user-select: none; }
+body.row-resizing { cursor: row-resize; user-select: none; }
+.pane-head {
+  display: flex; align-items: center; gap: 8px; padding: 0 12px;
+  height: 40px; /* 树/原文两栏头部统一高度，底边线严格对齐；内容垂直居中 */
+  background: var(--panel); border-bottom: 1px solid var(--border);
+  color: var(--fg-dim); font-size: 12px; flex: none;
+}
+.pane-head .tag {
+  background: var(--panel2); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1px 7px; font-size: 11px;
+}
+.pane-head .spacer { flex: 1; }
+/* 树头部展开/收缩图标按钮（24x24 圆角，hover 浮出 panel2 底色）*/
+.tree-ctl-btn {
+  flex: none; width: 24px; height: 24px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; border-radius: 6px; background: transparent;
+  color: var(--fg-dim); cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.tree-ctl-btn:hover { background: var(--panel2); color: var(--accent); }
+.tree-ctl-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.path-chip {
+  margin-left: auto; font-size: 12px; color: var(--accent);
+  background: var(--accent-dim); border-radius: 4px; padding: 1px 8px;
+  font-family: "Cascadia Code", Consolas, monospace;
+  max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pane-body { flex: 1; overflow: auto; }
+
+/* ── JSON 树类型图标（对齐原型 .icon 配色）── */
+/* 单行裁切：树节点行不换行——key / 值超宽时省略号截断（悬停 title 显示完整 literal）。
+   逐层放开宽度收缩：NTree 节点内容 flex 链上的每层都要 min-width:0，
+   否则长值会把树撑出横向滚动 */
+.tree-label {
+  display: flex; align-items: center; gap: 6px;
+  min-width: 0; max-width: 100%; overflow: hidden;
+}
+.tree-icon {
+  font-style: normal; flex: none;
+  width: 14px; text-align: center; line-height: 1;
+}
+.tree-label .tree-key,
+.tree-label .tree-root,
+.tree-label .tree-preview {
+  flex: 0 1 auto; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#treePane .n-tree-node-content { min-width: 0; overflow: hidden; }
+#treePane .n-tree-node-content__text { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+.tree-icon.k-obj, .tree-icon.k-arr { color: var(--fg-dim); }
+.tree-icon.k-str { color: var(--str); }
+.tree-icon.k-num { color: var(--num); }
+.tree-icon.k-bool { color: var(--bool); }
+.tree-icon.k-null { color: var(--fg-dim); }
+.tree-key { color: var(--key); }
+.tree-root { color: var(--fg-dim); }
+.tree-preview { color: var(--fg-dim); font-size: 11px; }
+
+/* ── 空态提示 / 错误条 ──────────────────── */
+/* 布局常驻：未加载文档时树区底部的引导文案（不占独立空态页） */
+.tree-empty-hint {
+  position: absolute; inset: 44px 0 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fg-dim); font-size: 13px; pointer-events: none;
+  padding: 0 16px; text-align: center;
+}
+/* 空态 "No Data"（NTree 自带）默认贴着头部太挤：下移到头部与居中引导文案之间 */
+#treePane .n-tree__empty { margin-top: 140px; }
+#treePane { position: relative; }
+.error-bar {
+  flex: none; padding: 6px 14px; background: var(--panel);
+  border-bottom: 1px solid var(--border); color: #e06c75;
+  font-family: "Cascadia Code", Consolas, monospace; font-size: 12.5px;
+}
+
+/* ── 状态栏 ─────────────────────────────── */
+.statusbar {
+  flex: none; display: flex; gap: 16px; padding: 4px 14px;
+  border-top: 1px solid var(--border); background: var(--panel);
+  color: var(--fg-dim); font-size: 11.5px; font-family: "Cascadia Code", Consolas, monospace;
+}
+.statusbar .ok { color: var(--str); }
+/* 探测会话状态栏入口：琥珀色可点 chip */
+.statusbar .detect-entry { color: var(--accent); cursor: pointer; user-select: none; }
+.statusbar .detect-entry:hover { text-decoration: underline; }
+
+/* ── 原文视图（CodeMirror 6）─────────────── */
+.cm-beam { background: var(--accent-dim); box-shadow: inset 3px 0 0 var(--accent); }
+.cm-err { text-decoration: underline wavy #e05561; }
+/* 搜索命中：普通 = accent 淡底；当前 = 更亮底 + accent 内描边 */
+.cm-hit { background: var(--accent-dim); }
+.cm-hit.cm-cur {
+  background: var(--hit);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.pane-head .head-hint { white-space: nowrap; }
+.raw-search {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+  min-width: 0; flex: 0 1 auto;
+}
+.raw-search-input {
+  width: 180px; min-width: 110px; height: 22px; padding: 0 8px;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: var(--bg); color: var(--fg); font-size: 12px;
+  outline: none; transition: border-color .15s;
+}
+.raw-search-input::placeholder { color: var(--fg-dim); }
+.raw-search-input:focus { border-color: var(--primary); }
+.search-count {
+  color: var(--fg-dim); font-size: 11px; white-space: nowrap;
+  min-width: 28px; text-align: center;
+}
+.app[data-theme="light"] .cm-editor { background: #fff; }
+#rawPane .cm-editor { height: 100%; }
+#rawPane .cm-scroller {
+  overflow: auto;
+  font-family: "Cascadia Code", Consolas, monospace;
+}
+/* 编辑器滚动条对齐左侧树的细滚动条（naive n-scrollbar 风格）：
+   10px 热区 + 2px 透明边 = 6px 视觉圆条，border 底色、hover 提亮，轨道透明无箭头 */
+#rawPane .cm-scroller::-webkit-scrollbar { width: 10px; height: 10px; }
+#rawPane .cm-scroller::-webkit-scrollbar-thumb {
+  background: var(--border); border-radius: 5px;
+  border: 2px solid transparent; background-clip: padding-box;
+}
+#rawPane .cm-scroller::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-dim); border-radius: 5px;
+  border: 2px solid transparent; background-clip: padding-box;
+}
+#rawPane .cm-scroller::-webkit-scrollbar-track,
+#rawPane .cm-scroller::-webkit-scrollbar-corner { background: transparent; }
+/* 拖拽中高亮 accent。注意：不要再加 scrollbar-width/scrollbar-color 标准属性——
+   Chromium 121+ 设置标准属性会整体禁用 ::-webkit-scrollbar 样式（hover 失效的根因） */
+#rawPane .cm-scroller::-webkit-scrollbar-thumb:active { background: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ── 表格视图（对齐原型 .grid：紧凑行 / 全网格边框 / 表头灰底 / 等宽字体）── */
+#tablePanel {
+  flex: none; display: flex; flex-direction: column;
+  height: 320px; min-height: 100px;
+  background: var(--panel);
+  overflow: hidden;
+}
+#tablePanel.collapsed { min-height: 0; }
+#tablePanel.collapsed .table-head { cursor: pointer; }
+#tablePanel.collapsed .table-head:hover { background: var(--panel2); }
+/* # 列专属：左右 padding 收窄到 4px、内容水平居中，行号贴边盛放（配合列宽按位数自适应）*/
+#tablePanel .n-data-table-th.col-index,
+#tablePanel .n-data-table-td.col-index { padding-left: 4px; padding-right: 4px; text-align: center; }
+/* 表头：panel2 底 + 文字比行文字淡一档（naive-ui themeOverrides 传 var()/color-mix
+   会被其内部颜色解析判为非法而整体回落默认主题，故用 CSS 直改）*/
+#tablePanel .n-data-table-th {
+  background: var(--panel2);
+  color: color-mix(in srgb, var(--fg-dim) 75%, transparent);
+}
+/* 行高收紧到 26-28px（td 上下 3px + 字号 12.5px 对齐原型密度）；斑马纹/横线不变 */
+#tablePanel .n-data-table-th,
+#tablePanel .n-data-table-td {
+  padding-top: 3px; padding-bottom: 3px;
+  font-size: 12.5px;
+}
+/* 表格贴满面板两侧：无圆角（naive themeOverrides 未生效，CSS 兜底）*/
+#tablePanel .n-data-table { border-radius: 0; }
+/* 细栏常驻空态（无表格数据）：固定 32px 引导条，置灰文案；点击恢复无效、不可拖拽
+   （empty 规则须在 collapsed 之后，光标/悬停覆盖 collapsed 的 pointer 样式） */
+#tablePanel.empty { height: 32px !important; }
+#tablePanel.empty .table-head { cursor: default; }
+#tablePanel.empty .table-head:hover { background: var(--panel); }
+#tablePanel.empty .title { color: var(--fg-dim); font-weight: 500; }
+.table-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px; background: var(--panel);
+  border-bottom: 1px solid var(--border); flex: none;
+  min-height: 32px; box-sizing: border-box; overflow: hidden;
+}
+.table-head .title { font-weight: 600; font-size: 12.5px; white-space: nowrap; }
+.table-head .n-input { flex: 1; max-width: 480px; }
+.match-info {
+  color: var(--fg-dim); font-size: 11.5px; white-space: nowrap;
+  font-family: "Cascadia Code", Consolas, monospace;
+}
+.col-chip {
+  color: #fff; background: var(--primary); border-radius: 4px;
+  padding: 2px 8px; font-size: 11.5px; white-space: nowrap;
+  cursor: pointer; user-select: none; transition: filter .15s;
+}
+.col-chip:hover { filter: brightness(1.2); }
+.dim { color: var(--fg-dim); }
+.hit-cell {
+  background: var(--hit); color: var(--accent);
+  border-radius: 0; padding: 1px 4px;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+/* 全网格边框 + 等宽单元格（主题变量之外的细粒度对齐） */
+#tablePanel .n-data-table-th,
+#tablePanel .n-data-table-td {
+  border-right: 1px solid var(--border);
+  font-family: "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  white-space: nowrap;
+}
+/* 单元格省略号（替代 naive ellipsis tooltip 的 CSS 实现）+ 悬停全文气泡 */
+#tablePanel .n-data-table-td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cell-tip {
+  position: fixed; z-index: 900; max-width: 480px; max-height: 200px; overflow: auto;
+  background: var(--panel); border: 1px solid var(--border); color: var(--fg);
+  border-radius: 6px; padding: 5px 9px; font-size: 12px;
+  font-family: "Cascadia Code", Consolas, monospace;
+  word-break: break-all; pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .35);
+}
+
+/* ── 处理中蒙版（树/原文双面板，格式化/压缩/解析期间；用户选定样例 A）── */
+#rawPane { position: relative; } /* 蒙版定位锚点（#treePane 已有 relative） */
+.panel-mask {
+  position: absolute; inset: 0; z-index: 500; /* 低于探测浮层 1000 */
+  display: flex; flex-direction: column; gap: 10px;
+  align-items: center; justify-content: center;
+  background: rgba(10, 12, 15, .62);
+}
+.mask-spinner {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 3px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-top-color: var(--accent);
+  animation: mask-spin .8s linear infinite;
+}
+@keyframes mask-spin { to { transform: rotate(360deg); } }
+.mask-text { font-size: 12px; color: var(--accent); letter-spacing: 1px; }
+
+/* 列宽拖拽：右缘 6px 热区（cursor 由 JS 按 hover 位置设置） */
+#tablePanel .n-data-table-th { position: relative; }
+body.col-resizing #tablePanel .n-data-table-th { cursor: col-resize !important; }
+/* 行分隔淡横线（叠加在斑马纹之上仍可见）；表头底线稍粗区分 */
+#tablePanel .n-data-table-td {
+  border-bottom: 1px solid var(--border) !important;
+}
+#tablePanel .n-data-table-th {
+  border-bottom: 2px solid var(--border) !important;
+}
+#tablePanel .n-data-table-th { cursor: context-menu; }
+/* 命中单元格的琥珀高亮优先级高于斑马纹 / hover */
+#tablePanel .n-data-table-td:has(.hit-cell) {
+  background: var(--hit) !important;
+}
+#tablePanel .n-data-table-th.col-filtering {
+  color: var(--primary);
+  box-shadow: inset 0 -2px 0 var(--primary);
+}
+.n-data-table-td.col-filtering {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+/* Excel 式列选中：低饱和 primary 底（与命中 ✓ 琥珀、斑马纹区分）*/
+#tablePanel .n-data-table-th.col-selected,
+#tablePanel .n-data-table-td.col-selected {
+  background: color-mix(in srgb, var(--primary) 12%, transparent) !important;
+}
+#tablePanel .n-data-table-th.col-selected {
+  box-shadow: inset 0 -2px 0 var(--primary);
+}
+/* Excel 式行选中：点 # 行号选整行，所有单元格同列选中的低饱和 primary 底 */
+#tablePanel .n-data-table-tr.row-selected .n-data-table-td {
+  background: color-mix(in srgb, var(--primary) 12%, transparent) !important;
+}
+/* # 行号单元格可点选整行：手型光标（宽度/居中/灰色由既有规则与 .dim 保证）*/
+#tablePanel .n-data-table-td.col-index { cursor: pointer; }
+.table-wrap {
+  flex: 1; min-height: 0; display: flex; flex-direction: column;
+  padding: 0; /* 表格网格贴满面板两侧，不留左右空隙 */
+}
+.table-wrap .n-data-table { flex: 1; min-height: 0; }
+/* 表格总宽 = Σ列宽（naive-ui 只给 table 设 min-width=scroll-x，width 仍是 auto 会
+   拉伸铺满面板 → 少列时最后一列被摊宽）。width:0 退到 min-width（=Σ列宽）：
+   少列时右侧留空，列多时超出面板出横向滚动。
+   仅限主网格（main-grid 有 scroll-x 提供min-width兜底）；行转列表无 scroll-x，
+   width:0 会把两列压到 0 宽导致文字叠写，故不适用 */
+#tablePanel .n-data-table.main-grid table { width: 0; }
+/* 行转列表格：字段列定宽 240px（盛放 ops_legal_entity_cn 等长展平路径），
+   值列占满剩余；table-layout: fixed + naive ellipsis → 长值省略号不撑破、不叠写 */
+#tablePanel .n-data-table.transpose-grid table {
+  width: 100%; min-width: 100%; table-layout: fixed;
+}
+.table-foot { flex: none; display: flex; justify-content: center; padding: 6px 0 2px; }

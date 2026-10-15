@@ -1,0 +1,21 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- 底：圆角方块，深蓝炭 -->
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="#1b1f26"/>
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="none" stroke="#2a3038" stroke-width="8"/>
+
+  <!-- 琥珀定位光束（左侧竖条 + 底部渐隐） -->
+  <rect x="88" y="120" width="14" height="272" rx="7" fill="#e8a33d"/>
+  <rect x="88" y="392" width="14" height="28" rx="7" fill="#e8a33d" opacity="0.35"/>
+
+  <!-- 左花括号 -->
+  <text x="150" y="340" font-family="Consolas, 'Cascadia Code', monospace" font-size="230"
+        font-weight="bold" fill="#7fb3e8" text-anchor="start">{</text>
+
+  <!-- 右花括号 -->
+  <text x="352" y="340" font-family="Consolas, 'Cascadia Code', monospace" font-size="230"
+        font-weight="bold" fill="#7fb3e8" text-anchor="start">}</text>
+
+  <!-- 光束命中点 -->
+  <circle cx="251" cy="256" r="26" fill="#e8a33d"/>
+  <circle cx="251" cy="256" r="12" fill="#1b1f26"/>
+</svg>

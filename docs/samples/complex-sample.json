@@ -1,0 +1,126 @@
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "requestId": "req-8f3a21c4-2026-10-12",
+    "server": "cn-east-1",
+    "cached": false,
+    "cost": 0.0137,
+    "pagination": {
+      "page": 1,
+      "pageSize": 50,
+      "total": 3281,
+      "hasMore": true,
+      "nextCursor": "eyJpZCI6MTAwfQ=="
+    },
+    "users": [
+      {
+        "id": 1001,
+        "name": "张伟",
+        "age": 30,
+        "email": "zhangwei@example.com",
+        "city": "北京",
+        "vip": true,
+        "balance": 15230.55,
+        "tags": ["管理员", "付费用户"],
+        "profile": { "level": 9, "exp": 87200, "active": true, "lastLogin": "2026-10-11T22:31:08Z" },
+        "address": { "province": "北京市", "district": "海淀区", "detail": "中关村大街1号院3号楼" },
+        "remark": null
+      },
+      {
+        "id": 1002,
+        "name": "Li Wei 👨‍💻",
+        "age": 25,
+        "email": "liwei@example.com",
+        "city": "上海",
+        "vip": false,
+        "balance": 88.5,
+        "tags": ["试用用户"],
+        "profile": { "level": 3, "exp": 12400, "active": false, "lastLogin": "2026-09-30T08:15:00Z" },
+        "address": { "province": "上海市", "district": "浦东新区", "detail": "张江高科技园区博云路2号" },
+        "remark": "备注：转义测试 \"引号\" 与反斜杠 \\ 以及换行\n第二行 中文混排 mixed 123"
+      },
+      {
+        "id": 1003,
+        "name": "王芳",
+        "age": 35,
+        "email": "wangfang@example.com",
+        "city": "深圳",
+        "vip": true,
+        "balance": 99999.99,
+        "tags": ["开发者", "版主", "付费用户"],
+        "profile": { "level": 6, "exp": 51000, "active": true, "lastLogin": "2026-10-12T01:02:03Z" },
+        "address": { "province": "广东省", "district": "南山区", "detail": "科技园南区深南大道9988号" },
+        "remark": "emoji 测试 😀🎉 以及 unicode 转义 你好"
+      }
+    ],
+    "orders": [
+      {
+        "orderId": "SO-2026-0001",
+        "userId": 1001,
+        "status": "已发货",
+        "amount": 1299.0,
+        "currency": "CNY",
+        "items": [
+          { "sku": "SKU-A1", "name": "机械键盘", "qty": 1, "price": 899.0 },
+          { "sku": "SKU-B2", "name": "鼠标垫", "qty": 2, "price": 200.0 }
+        ],
+        "createdAt": "2026-10-01T10:00:00Z"
+      },
+      {
+        "orderId": "SO-2026-0002",
+        "userId": 1003,
+        "status": "已完成",
+        "amount": 56.8,
+        "currency": "CNY",
+        "items": [
+          { "sku": "SKU-C3", "name": "数据线", "qty": 1, "price": 29.9 },
+          { "sku": "SKU-D4", "name": "充电头", "qty": 1, "price": 26.9 }
+        ],
+        "createdAt": "2026-10-05T18:30:00Z"
+      },
+      {
+        "orderId": "SO-2026-0003",
+        "userId": 1002,
+        "status": "待支付",
+        "amount": 45000,
+        "currency": "CNY",
+        "items": [
+          { "sku": "SKU-E5", "name": "显示器", "qty": 1, "price": 45000 }
+        ],
+        "createdAt": "2026-10-11T21:00:00Z"
+      }
+    ],
+    "config": {
+      "theme": "dark",
+      "language": "zh-CN",
+      "features": {
+        "experimental": true,
+        "flags": ["new-table", "fast-parse", "tree-locate"],
+        "limits": { "maxUploadMb": 200, "timeoutMs": 3e4, "retry": 3 }
+      },
+      "embeddedJson": "{\"version\": 2, \"rules\": [{\"type\": \"allow\", \"domain\": \"example.com\"}, {\"type\": \"deny\", \"domain\": \"ads.example.net\"}]}",
+      "doubleEncoded": "{\"level1\": \"{\\\"level2\\\": [{\\\"deep\\\": true}]}\", \"note\": \"双重转义测试\"}"
+    },
+    "logs": [
+      { "ts": "2026-10-12T09:00:00.123Z", "level": "INFO", "msg": "服务启动完成，耗时 812ms", "trace": "t-001" },
+      { "ts": "2026-10-12T09:00:01.456Z", "level": "WARN", "msg": "缓存命中率低于阈值：42%", "trace": "t-002" },
+      { "ts": "2026-10-12T09:00:02.789Z", "level": "ERROR", "msg": "下游超时 upstream=payment timeout=3000ms", "trace": "t-003" },
+      { "ts": "2026-10-12T09:00:03.000Z", "level": "INFO", "msg": "请求处理完成 path=/api/v2/users status=200", "trace": "t-004" }
+    ],
+    "deepNest": {
+      "l1": {
+        "l2": {
+          "l3": {
+            "l4": {
+              "l5": {
+                "l6": { "leaf": "到底了 🏁", "values": [1, 2.5, -3e2, null, true, "混合数组"] }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "signature": "sha256:9f2a1c8e77b04d3eaa56c1de88bb2299f0e4d1c3"
+}
